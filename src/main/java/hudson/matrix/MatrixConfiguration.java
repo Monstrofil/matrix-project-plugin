@@ -238,6 +238,14 @@ public class MatrixConfiguration extends Project<MatrixConfiguration,MatrixRun> 
         return combination;
     }
 
+    public boolean evalCombinationFilter() {
+        if(this.getParent().getCombinationFilter() == "")
+            return true;
+
+        return this.getCombination().evalGroovyExpression(
+            this.getParent().getCombinationFilter());
+    }
+
     /**
      * Since {@link MatrixConfiguration} is always invoked from {@link MatrixRun}
      * once and just once, there's no point in having a quiet period.

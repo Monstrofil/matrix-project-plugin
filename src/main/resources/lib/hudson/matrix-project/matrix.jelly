@@ -86,9 +86,14 @@ THE SOFTWARE.
                 <td class="matrix-cell">
                   <j:choose>
                     <j:forEach var="p" items="${c}">
-                      <div>
-                        <d:invokeBody />
-                      </div>
+                      <j:when test="${p.evalCombinationFilter()}">
+                        <div>
+                          <d:invokeBody />
+                        </div>
+                      </j:when>
+                      <j:otherwise>
+                        <span tooltip="Filtered out">--</span>
+                      </j:otherwise>
                     </j:forEach>
                   </j:choose>
                 </td>
