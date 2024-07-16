@@ -87,8 +87,8 @@ public final class Combination extends TreeMap<String,String> implements Compara
      * For example, if this combination is a=X,b=Y, then expressions like <code>a=="X"</code> would evaluate to
      * true.
      */
-    public boolean evalGroovyExpression(AxisList axes, String expression) {
-        return evalGroovyExpression(axes, expression, new Binding());
+    public boolean evalGroovyExpression(String expression) {
+        return evalGroovyExpression(expression, new Binding());
     }
 
     /**
@@ -98,8 +98,8 @@ public final class Combination extends TreeMap<String,String> implements Compara
      *      Use {@link FilterScript#apply(hudson.matrix.MatrixBuild.MatrixBuildExecution, Combination)}
      */
     @Deprecated
-    public boolean evalGroovyExpression(AxisList axes, String expression, Binding binding) {
-        return FilterScript.parse(expression).apply(axes, this, binding);
+    public boolean evalGroovyExpression(String expression, Binding binding) {
+        return FilterScript.parse(expression).apply(this, binding);
     }
 
     public int compareTo(Combination that) {

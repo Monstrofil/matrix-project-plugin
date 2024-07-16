@@ -665,7 +665,7 @@ public class MatrixProject extends AbstractProject<MatrixProject,MatrixBuild> im
         final boolean isDynamicFilter = isDynamicFilter(getCombinationFilter());
 
         for (Combination c : activeCombinations) {
-            if(isDynamicFilter || c.evalGroovyExpression(axes,getCombinationFilter())) {
+            if(isDynamicFilter || c.evalGroovyExpression(getCombinationFilter())) {
         		LOGGER.fine("Adding configuration: " + c);
 	            MatrixConfiguration config = configurations.get(c);
 	            if(config==null) {

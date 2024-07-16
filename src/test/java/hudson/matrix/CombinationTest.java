@@ -86,6 +86,6 @@ public class CombinationTest {
     }
 
     private boolean eval(Combination c, String exp) {
-        return c.evalGroovyExpression(axes, exp);
+        return c.evalGroovyExpression(exp);
     }
 }

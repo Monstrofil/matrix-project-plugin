@@ -72,16 +72,12 @@ class FilterScript {
      * Applies the filter to the specified combination in the context of {@code context}.
      */
     public final boolean apply(MatrixBuildExecution context, Combination combination) {
-        return apply(context.getProject().getAxes(), combination, getConfiguredBinding(context));
+        return apply(combination, getConfiguredBinding(context));
     }
 
-    /*package*/ boolean apply(AxisList axes, Combination c, Binding binding) {
+    /*package*/ boolean apply(Combination c, Binding binding) {
         for (Map.Entry<String, String> e : c.entrySet())
             binding.setVariable(e.getKey(),e.getValue());
-
-        binding.setVariable("index",toModuloIndex(axes,c));
-        binding.setVariable("uniqueId", c.toIndex(axes));
-
         return evaluate(binding);
     }
 
@@ -121,7 +117,7 @@ class FilterScript {
      */
     /*package*/ static final FilterScript ACCEPT_ALL = new FilterScript(null) {
         @Override
-        public boolean apply(AxisList axes, Combination combination, Binding binding) {
+        public boolean apply(Combination combination, Binding binding) {
             return true;
         }
     };
@@ -132,7 +128,7 @@ class FilterScript {
      */
     /*package*/ static final FilterScript REJECT_ALL = new FilterScript(null) {
         @Override
-        public boolean apply(AxisList axes, Combination combination, Binding binding) {
+        public boolean apply(Combination combination, Binding binding) {
             return false;
         }
     };
