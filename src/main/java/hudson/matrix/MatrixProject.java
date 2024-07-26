@@ -504,7 +504,7 @@ public class MatrixProject extends AbstractProject<MatrixProject,MatrixBuild> im
     }
 
     public Layouter<MatrixConfiguration> getLayouter() {
-        return new Layouter<MatrixConfiguration>(axes) {
+        return new Layouter<MatrixConfiguration>(axes, this.getCombinationFilter()) {
             @Override
             protected MatrixConfiguration getT(Combination c) {
                 return getItem(c);

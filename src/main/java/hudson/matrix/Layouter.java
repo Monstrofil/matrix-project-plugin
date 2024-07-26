@@ -56,18 +56,29 @@ public abstract class Layouter<T> {
      */
     private int xSize, ySize, zSize;
 
+    /*
+     * Combination filter used to exclude some cells
+     */
+    private String combinationFilter;
 
-    public Layouter(List<Axis> x, List<Axis> y, List<Axis> z) {
+    /*
+     * Caches filter evaluation result so it will take less time to build matrix
+     */
+    private Map<String, Boolean> combinationsCache = new HashMap<String, Boolean>();
+
+
+    public Layouter(List<Axis> x, List<Axis> y, List<Axis> z, String combinationFilter) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.combinationFilter = combinationFilter;
         init();
     }
 
     /**
      * Automatically split axes to x,y, and z.
      */
-    public Layouter(AxisList axisList) {
+    public Layouter(AxisList axisList, String combinationFilter) {
         x = new ArrayList<Axis>();
         y = new ArrayList<Axis>();
         z = new ArrayList<Axis>();
@@ -98,20 +109,22 @@ public abstract class Layouter<T> {
             for( int i=0; i<nonTrivialAxes.size(); i++ )
                 (i%3==1?x:y).add(nonTrivialAxes.get(i));
         }
+        
+        this.combinationFilter = combinationFilter;
         init();
     }
 
     private void init() {
-        xSize = calc(x,-1);
-        ySize = calc(y,-1);
-        zSize = calc(z,-1);
+        xSize = calculateChildrenNumber(x,-1);
+        ySize = calculateChildrenNumber(y,-1);
+        zSize = calculateChildrenNumber(z,-1);
     }
 
     /**
      * Computes the width of n-th X-axis.
      */
     public int width(int n) {
-        return calc(x,n);
+        return calculateChildrenNumber(x,n);
     }
 
     /**
@@ -125,17 +138,45 @@ public abstract class Layouter<T> {
     }
 
     /**
-     * Computes the width of n-th Y-axis.
-     */
+     * Computes the height of n-th Y-axis.
+     */    
     public int height(int n) {
-        return calc(y,n);
+        return calculateChildrenNumber(y,n);
     }
 
-    private int calc(List<Axis> l, int n) {
-        int w = 1;
-        for( n++ ; n<l.size(); n++ )
-            w *= l.get(n).size();
-        return w;
+    public int getVisibleCells(int rowIndex, Row row) {
+        int height = height(rowIndex);
+        if(height == 1) {
+            return row.getVisibleChildren() > 0 ? 1 : 0;
+        }
+
+        List<Row> rows = this.getRows();
+        int visibleCellsInGroup = 0;
+        for(int i = rowIndex; i < rowIndex + height; i++) {
+            Row r = rows.get(i);
+            visibleCellsInGroup += (r.getVisibleCells() > 0) ? 1 : 0;
+        }
+
+        return visibleCellsInGroup;
+    }
+
+    private boolean evaluateExpression(Combination c, String expression) {
+        String cacheKey = c.toString();
+        if(combinationsCache.containsKey(cacheKey)) {
+            return combinationsCache.get(cacheKey);
+        }
+        boolean result = c.evalGroovyExpression(expression);
+        combinationsCache.put(cacheKey, result);
+        return result;
+    }
+
+    private int calculateChildrenNumber(List<Axis> listAxis, int startIndex) {
+        this.getRows().get(startIndex);
+
+        int size = 1;
+        for( startIndex++ ; startIndex<listAxis.size(); startIndex++ )
+            size *= listAxis.get(startIndex).size();
+        return size;
     }
 
     /**
@@ -177,8 +218,31 @@ public abstract class Layouter<T> {
             return xSize;
         }
 
+        
+        public int getIndex() {
+            return index;
+        }
+
+        public Integer getVisibleCells() {
+            int cellsNumber = 0;
+            for(int i = 1; i <= this.size(); i++) {
+                Column col = this.get(i);
+                cellsNumber += col.getVisibleCells();
+            }
+            return cellsNumber;
+        }
+
+        public Integer getVisibleChildren() {
+            int cellsNumber = 0;
+            for(int i = 1; i <= this.size(); i++) {
+                Column col = this.get(i);
+                cellsNumber += (col.getVisibleCells() > 0) ? 1 : 0;
+            }
+            return cellsNumber;
+        }
+
         public String drawYHeader(int n) {
-            int base = calc(y,n);
+            int base = calculateChildrenNumber(y,n);
             if(index/base==(index-1)/base && index!=0)  return null;    // no need to draw a new value
 
             Axis axis = y.get(n);
@@ -197,6 +261,10 @@ public abstract class Layouter<T> {
         private final Map<String,String> m = new HashMap<String,String>();
 
         public T get(int zp) {
+            return getT(getCombination(zp));
+        }
+
+        public Combination getCombination(int zp) {
             m.clear();
             buildMap(xp,x);
             buildMap(yp,y);
@@ -206,7 +274,7 @@ public abstract class Layouter<T> {
                     m.put(a.getName(), a.value(0));
                 }
             }
-            return getT(new Combination(m));
+            return new Combination(m);
         }
 
         private void buildMap(int p, List<Axis> axes) {
@@ -216,6 +284,15 @@ public abstract class Layouter<T> {
                 m.put(a.getName(), a.value(n%a.size()));
                 n /= a.size();
             }
+        }
+
+        public Integer getVisibleCells() {
+            Integer cellsCount = 0;
+            for(int i = 1; i <= this.size(); i++) {
+                Combination c = this.getCombination(i);
+                cellsCount += evaluateExpression(c, combinationFilter) ? 1 : 0;
+            }
+            return cellsCount;
         }
 
         public int size() {

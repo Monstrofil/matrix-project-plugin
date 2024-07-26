@@ -75,29 +75,36 @@ THE SOFTWARE.
           <j:forEach var="r" items="${o.rows}">
             <tr>
               <j:forEach var="y" items="${o.y}" varStatus="loop">
-                <j:if test="${r.drawYHeader(loop.index)!=null}">
+                <j:if test="${r.drawYHeader(loop.index) != null and o.getVisibleCells(loop.index, r) > 0}">
                   <td class="matrix-leftcolumn" rowspan="${o.height(loop.index)}">
                     <span tooltip="${h.xmlEscape(y.name)}">${r.drawYHeader(loop.index)}</span>
                   </td>
                 </j:if>
               </j:forEach>
 
-              <j:forEach var="c" items="${r}">
-                <td class="matrix-cell">
-                  <j:choose>
-                    <j:forEach var="p" items="${c}">
-                      <j:when test="${p.evalCombinationFilter()}">
-                        <div>
-                          <d:invokeBody />
-                        </div>
-                      </j:when>
-                      <j:otherwise>
-                        <span tooltip="Filtered out">--</span>
-                      </j:otherwise>
-                    </j:forEach>
-                  </j:choose>
-                </td>
-              </j:forEach>
+            
+              <j:if test="${r.getVisibleCells() > 0}">
+                <j:forEach var="c" items="${r}">
+                  <td class="matrix-cell">
+                    <j:choose>
+                      <j:forEach var="p" items="${c}">
+                        <j:when test="${p.evalCombinationFilter()}">
+                          <div style="width: 60px">
+                            <d:invokeBody />
+                          </div>
+                        </j:when>
+                        <j:otherwise>
+                          <svg class="icon-md" tooltip="Disabled by matrix filter" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                              <ellipse cx="256" cy="256" rx="210" ry="210" fill="none" stroke="var(--text-color-secondary)" stroke-linecap="round" stroke-miterlimit="10" stroke-width="36"></ellipse>
+                              <ellipse cx="256" cy="256" rx="100" ry="100" fill="none" stroke="var(--text-color-secondary)" stroke-linecap="round" stroke-miterlimit="10" stroke-width="36"></ellipse>
+                              <path fill="none" stroke="var(--text-color-secondary)" stroke-linecap="round" stroke-linejoin="round" stroke-width="36" d="M192 320l128-128"></path>
+                          </svg>
+                        </j:otherwise>
+                      </j:forEach>
+                    </j:choose>
+                  </td>
+                </j:forEach>
+              </j:if>
             </tr>
           </j:forEach>
         </table>

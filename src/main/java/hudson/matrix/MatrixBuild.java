@@ -174,7 +174,8 @@ public class MatrixBuild extends AbstractBuild<MatrixProject,MatrixBuild> {
 
     public Layouter<RunPtr> getLayouter() {
         // axes can be null if build page is access right when build starts
-        return axes == null ? null : new Layouter<RunPtr>(axes) {
+        String combinationFilter = this.getParent().getCombinationFilter();
+        return axes == null ? null : new Layouter<RunPtr>(axes, combinationFilter) {
             protected RunPtr getT(Combination c) {
                 return new RunPtr(c);
             }
