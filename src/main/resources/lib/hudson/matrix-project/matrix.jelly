@@ -72,10 +72,10 @@ THE SOFTWARE.
           </j:forEach>
 
           <!-- Y-axis -->
-          <j:forEach var="r" items="${o.rows}">
+          <j:forEach var="r" items="${o.rows}" varStatus="rows_loop">
             <tr>
               <j:forEach var="y" items="${o.y}" varStatus="loop">
-                <j:if test="${r.drawYHeader(loop.index) != null and o.getVisibleCells(loop.index, r) > 0}">
+                <j:if test="${r.drawYHeader(loop.index) != null and o.getVisibleCells(rows_loop.index, loop.index, r) > 0}">
                   <td class="matrix-leftcolumn" rowspan="${o.height(loop.index)}">
                     <span tooltip="${h.xmlEscape(y.name)}">${r.drawYHeader(loop.index)}</span>
                   </td>

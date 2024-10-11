@@ -144,17 +144,17 @@ public abstract class Layouter<T> {
         return calculateChildrenNumber(y,n);
     }
 
-    public int getVisibleCells(int rowIndex, Row row) {
-        int height = height(rowIndex);
+    public int getVisibleCells(int rowIndex, int heightIndex, Row row) {
+        int height = height(heightIndex);
         if(height == 1) {
-            return row.getVisibleChildren() > 0 ? 1 : 0;
+            return row.getVisibleChildren();
         }
 
         List<Row> rows = this.getRows();
         int visibleCellsInGroup = 0;
         for(int i = rowIndex; i < rowIndex + height; i++) {
             Row r = rows.get(i);
-            visibleCellsInGroup += (r.getVisibleCells() > 0) ? 1 : 0;
+            visibleCellsInGroup += r.getVisibleCells();
         }
 
         return visibleCellsInGroup;
@@ -236,7 +236,7 @@ public abstract class Layouter<T> {
             int cellsNumber = 0;
             for(int i = 1; i <= this.size(); i++) {
                 Column col = this.get(i);
-                cellsNumber += (col.getVisibleCells() > 0) ? 1 : 0;
+                cellsNumber += col.getVisibleCells();
             }
             return cellsNumber;
         }
