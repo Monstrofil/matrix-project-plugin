@@ -88,8 +88,8 @@ THE SOFTWARE.
                   <td class="matrix-cell">
                     <j:choose>
                       <j:forEach var="p" items="${c}">
-                        <j:when test="${p.evalCombinationFilter()}">
-                          <div style="width: 60px">
+                        <j:when test="${p.isCombinationActive()}">
+                          <div>
                             <d:invokeBody />
                           </div>
                         </j:when>

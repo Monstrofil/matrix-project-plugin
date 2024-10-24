@@ -58,6 +58,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import javax.servlet.ServletException;
@@ -124,7 +125,11 @@ public class MatrixBuild extends AbstractBuild<MatrixProject,MatrixBuild> {
      */
     public final class RunPtr {
         public final Combination combination;
-        private RunPtr(Combination c) { this.combination=c; }
+        public final HashSet<String> activeCombinations;
+        private RunPtr(Combination c, HashSet<String> f) {
+            this.combination = c;
+            this.activeCombinations = f;
+        }
 
         public MatrixRun getRun() {
             return MatrixBuild.this.getRun(combination);
@@ -151,6 +156,11 @@ public class MatrixBuild extends AbstractBuild<MatrixProject,MatrixBuild> {
             return Util.rawEncode(combination.toString());
         }
 
+        public boolean isCombinationActive() {
+            return this.activeCombinations.contains(
+                this.combination.toString());
+        }
+
         /**
          * Gets a tooltip from the item.
          * @return Tooltip or null if it cannot be retrieved.
@@ -174,10 +184,10 @@ public class MatrixBuild extends AbstractBuild<MatrixProject,MatrixBuild> {
 
     public Layouter<RunPtr> getLayouter() {
         // axes can be null if build page is access right when build starts
-        String combinationFilter = this.getParent().getCombinationFilter();
+        HashSet<String> combinationFilter = this.getParent().getActiveCombinationsSet();
         return axes == null ? null : new Layouter<RunPtr>(axes, combinationFilter) {
             protected RunPtr getT(Combination c) {
-                return new RunPtr(c);
+                return new RunPtr(c, combinationFilter);
             }
         };
     }

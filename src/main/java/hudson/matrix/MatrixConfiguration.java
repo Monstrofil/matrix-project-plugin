@@ -238,12 +238,9 @@ public class MatrixConfiguration extends Project<MatrixConfiguration,MatrixRun> 
         return combination;
     }
 
-    public boolean evalCombinationFilter() {
-        if(this.getParent().getCombinationFilter() == "")
-            return true;
-
-        return this.getCombination().evalGroovyExpression(
-            this.getParent().getCombinationFilter());
+    public boolean isCombinationActive() {
+        return this.getParent().getActiveCombinationsSet().contains(
+            this.getCombination().toString());
     }
 
     /**

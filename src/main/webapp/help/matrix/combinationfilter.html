@@ -41,14 +41,17 @@
     </table>
   </center>
 
-  <h4>Sparsening of the matrix</h4>
+  <h4>Script-style filter</h4>
   <p>
-  In addition to the specific filtering rules based on values, one can also use a special
-  variable "<tt>index</tt>", which can be used to sparsen the matrix.
+  In addition to the inline filters, "real" scripts are supported.
+  Script is executed inside Sandbox and some Groovy features
+  are restricted (like functions).
 
-  <p>
-  For example, <tt>index%2==0</tt> would cut the matrix size in half by removing one
-  combination per every 2 combinations, in such a way that the coverage is still reasonable.
-  Similarly, <tt>index%3!=0</tt> would cut the matrix size into 66% by throwing
-  away every 1 out of 3 combinations.
+  <pre>if (label == "linux") {
+    return false;
+}
+if (compiler == "cc") {
+    return false;
+}
+return true</pre>
 </div>

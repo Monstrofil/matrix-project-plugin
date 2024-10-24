@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.AbstractList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Used to assist thegeneration of config table.
@@ -57,28 +58,23 @@ public abstract class Layouter<T> {
     private int xSize, ySize, zSize;
 
     /*
-     * Combination filter used to exclude some cells
+     * Combinations that are currently active in project
      */
-    private String combinationFilter;
-
-    /*
-     * Caches filter evaluation result so it will take less time to build matrix
-     */
-    private Map<String, Boolean> combinationsCache = new HashMap<String, Boolean>();
+    private HashSet<String> activeCombinations;
 
 
-    public Layouter(List<Axis> x, List<Axis> y, List<Axis> z, String combinationFilter) {
+    public Layouter(List<Axis> x, List<Axis> y, List<Axis> z, HashSet<String> activeCombinations) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.combinationFilter = combinationFilter;
+        this.activeCombinations = activeCombinations;
         init();
     }
 
     /**
      * Automatically split axes to x,y, and z.
      */
-    public Layouter(AxisList axisList, String combinationFilter) {
+    public Layouter(AxisList axisList, HashSet<String> activeCombinations) {
         x = new ArrayList<Axis>();
         y = new ArrayList<Axis>();
         z = new ArrayList<Axis>();
@@ -110,7 +106,7 @@ public abstract class Layouter<T> {
                 (i%3==1?x:y).add(nonTrivialAxes.get(i));
         }
         
-        this.combinationFilter = combinationFilter;
+        this.activeCombinations = activeCombinations;
         init();
     }
 
@@ -158,16 +154,6 @@ public abstract class Layouter<T> {
         }
 
         return visibleCellsInGroup;
-    }
-
-    private boolean evaluateExpression(Combination c, String expression) {
-        String cacheKey = c.toString();
-        if(combinationsCache.containsKey(cacheKey)) {
-            return combinationsCache.get(cacheKey);
-        }
-        boolean result = c.evalGroovyExpression(expression);
-        combinationsCache.put(cacheKey, result);
-        return result;
     }
 
     private int calculateChildrenNumber(List<Axis> listAxis, int startIndex) {
@@ -290,7 +276,7 @@ public abstract class Layouter<T> {
             Integer cellsCount = 0;
             for(int i = 1; i <= this.size(); i++) {
                 Combination c = this.getCombination(i);
-                cellsCount += evaluateExpression(c, combinationFilter) ? 1 : 0;
+                cellsCount += activeCombinations.contains(c.toString()) ? 1 : 0;
             }
             return cellsCount;
         }

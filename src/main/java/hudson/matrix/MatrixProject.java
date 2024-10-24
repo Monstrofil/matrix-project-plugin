@@ -138,6 +138,14 @@ public class MatrixProject extends AbstractProject<MatrixProject,MatrixBuild> im
     private volatile String combinationFilter;
 
     /**
+     * HashSet that contains all active combinations in the current job.
+     * Updated only when parameters of the job change.
+     *
+     * @see #getActiveCombinationsSet()
+     */
+    private volatile HashSet<String> activeCombinationsSet;
+
+    /**
      * List of active {@link Builder}s configured for this project.
      */
     private DescribableList<Builder,Descriptor<Builder>> builders =
@@ -398,6 +406,16 @@ public class MatrixProject extends AbstractProject<MatrixProject,MatrixBuild> im
     }
 
     /**
+     * Obtains the HashSet of active Combinations. Provides a quick way to check if combination is active.
+     *
+     * @return can be null.
+     * @since 1.500
+     */
+    public HashSet<String> getActiveCombinationsSet() {
+        return this.activeCombinationsSet;
+    }
+
+    /**
      * @return can be null (to indicate that the configurations should be left to their natural order.)
      * @deprecated as of 1.456
      *      Use {@link DefaultMatrixExecutionStrategyImpl#getTouchStoneCombinationFilter()}.
@@ -506,7 +524,7 @@ public class MatrixProject extends AbstractProject<MatrixProject,MatrixBuild> im
     }
 
     public Layouter<MatrixConfiguration> getLayouter() {
-        return new Layouter<MatrixConfiguration>(axes, this.getCombinationFilter()) {
+        return new Layouter<MatrixConfiguration>(axes, this.activeCombinationsSet) {
             @Override
             protected MatrixConfiguration getT(Combination c) {
                 return getItem(c);
@@ -666,8 +684,11 @@ public class MatrixProject extends AbstractProject<MatrixProject,MatrixBuild> im
         final Set<MatrixConfiguration> active = new LinkedHashSet<MatrixConfiguration>();
         final boolean isDynamicFilter = isDynamicFilter(getCombinationFilter());
 
+        this.activeCombinationsSet = new HashSet<String>();
+
         for (Combination c : activeCombinations) {
             if(isDynamicFilter || c.evalGroovyExpression(getCombinationFilter())) {
+                activeCombinationsSet.add(c.toString());
         		LOGGER.fine("Adding configuration: " + c);
 	            MatrixConfiguration config = configurations.get(c);
 	            if(config==null) {

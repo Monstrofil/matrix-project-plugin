@@ -69,7 +69,8 @@ THE SOFTWARE.
     <f:optionalBlock name="hasCombinationFilter" title="${%Combination Filter}" checked="${!empty(it.combinationFilter)}"
         help="/plugin/matrix-project/help/matrix/combinationfilter.html">
 	    <f:entry title="${%Filter}">
-	      <f:textbox name="combinationFilter" value="${it.combinationFilter}" />
+	      <f:textarea class="script" name="combinationFilter" value="${it.combinationFilter}" />
+        <st:adjunct includes="org.kohsuke.stapler.codemirror.mode.groovy.groovy"/>
 	    </f:entry>
     </f:optionalBlock>
 
